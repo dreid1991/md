@@ -13,7 +13,7 @@ bool Box::inside(Vector &v) {
 }
 
 Vector Box::randV() {
-	return Vector(origin.x + rand() * trace.x, origin.y + rand() * trace.y, origin.x +rand() * trace.z);
+	return Vector(origin.x + ((double) rand() / RAND_MAX) * trace.x, origin.y + ((double) rand() / RAND_MAX) * trace.y, origin.z + ((double) rand() / RAND_MAX) * trace.z);
 }
 
 

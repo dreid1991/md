@@ -1,7 +1,7 @@
 #include "Atom.h"
 #include "Vector.h"
 
-Atom::Atom(SpeciesDef &def): p(Vector()), v(Vector()), a(Vector()) {
+Atom::Atom(SpeciesDef &def, Vector p_): p(Vector(p_)), v(Vector()), a(Vector()) {
 	m = def.m;
 	type = def.type;
 	sig = def.sig;

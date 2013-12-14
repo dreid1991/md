@@ -6,6 +6,8 @@
 #include "PARMS.h"
 #include "CreateAtoms.h"
 #include "SpeciesDef.h"
+
+#include <stdlib.h>
 using namespace std;
 CreateAtoms::CreateAtoms() {
 
@@ -22,7 +24,9 @@ vector<Atom> CreateAtoms::box (Box &bounds, int type, int count) {
 	}
 	SpeciesDef def = defIt->second;
 	for (int i=0; i<count; i++) {
-		atoms.push_back(Atom(def));
+		Vector p = bounds.randV();
+		cout << p.x << endl	;
+		atoms.push_back(Atom(def, p));
 	}
 	return atoms;
 }

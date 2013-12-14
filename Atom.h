@@ -6,7 +6,7 @@
 
 class Atom {
 	public:
-		Atom(SpeciesDef &);
+		Atom(SpeciesDef &, Vector);
 		int type;
 		int id;
 		int sig;
