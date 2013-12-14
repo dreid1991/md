@@ -7,7 +7,8 @@
 using namespace std;
 class CreateAtoms {
 	public:
-		vector<Atom> box(Box &, int count, int type);
+		CreateAtoms();
+		vector<Atom> box(Box &, int type, int count);
 };
 
 #endif

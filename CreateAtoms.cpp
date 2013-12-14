@@ -5,12 +5,18 @@
 #include "Vector.h"
 #include "PARMS.h"
 #include "CreateAtoms.h"
+#include "SpeciesDef.h"
 using namespace std;
+CreateAtoms::CreateAtoms() {
 
-vector<Atom> CreateAtoms::box (Box &bounds, int count, int type) {
+}
+vector<Atom> CreateAtoms::box (Box &bounds, int type, int count) {
+	SpeciesDef foo = PARMS::SPECIESDEFS.find(1)->second;
+	cout << foo.m << endl;
 	map<int, SpeciesDef>::iterator defIt = PARMS::SPECIESDEFS.find(type);
 	vector<Atom> atoms;
-	if (defIt == SPECIESDEFS.end()) {
+
+	if (defIt == PARMS::SPECIESDEFS.end()) {
 		cout << "BAD SPECIES DEF" << endl;
 		return atoms;
 	}
