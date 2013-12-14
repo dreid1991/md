@@ -2,7 +2,13 @@
 #define SPECIESDEF_H
 
 class SpeciesDef {
-	SpeciesDef(int type, int m);
+	public:
+		SpeciesDef(int type, int m, int sig, int eps);
+		int type;
+		int m;
+		int sig;
+		int eps;
+
 };
 
 #endif
