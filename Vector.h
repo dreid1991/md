@@ -1,15 +1,21 @@
-#include <math.h>
 #ifndef VECTOR_H
 #define VECTOR_H
 
+#include <math.h>
+#include <iostream>
+using namespace std;
 const double EPSILON = .000001;
 class Vector{
 	public:
 		double x,y,z;
-
 		Vector():x(0),y(0),z(0){
 		}
-		Vector( double x,float y,float z ):x(x),y(y),z(z){
+		Vector(double x, double y):x(x),y(y),z(0){
+		}
+		Vector( double x,double y,double z ):x(x),y(y),z(z){
+		}
+		Vector VTo(Vector &v) {
+			return Vector(v.x - x, v.y - y, v.z - z);
 		}
 		operator double*(){
 			return &x;
@@ -79,17 +85,20 @@ class Vector{
 		Vector cross( const Vector &q )const{
 			return Vector( y*q.z-z*q.y,z*q.x-x*q.z,x*q.y-y*q.x );
 		}
-		double length()const{
-			return sqrtf(x*x+y*y+z*z);
+		double len()const{
+			return sqrt(x*x+y*y+z*z);
 		}
-		double distance( const Vector &q )const{
-			double dx=x-q.x,dy=y-q.y,dz=z-q.z;return sqrtf(dx*dx+dy*dy+dz*dz);
+		double dist( const Vector &q )const{
+			double dx=x-q.x,dy=y-q.y,dz=z-q.z;return sqrt(dx*dx+dy*dy+dz*dz);
+		}
+		double distSqr( const Vector &q) {
+			double dx=x-q.x,dy=y-q.y,dz=z-q.z;return dx*dx+dy*dy+dz*dz;
 		}
 		Vector normalized()const{
-			double l=length();return Vector( x/l,y/l,z/l );
+			double l=len();return Vector( x/l,y/l,z/l );
 		}
 		void normalize(){
-			double l=length();x/=l;y/=l;z/=l;
+			double l=len();x/=l;y/=l;z/=l;
 		}
 		double yaw()const{
 			return -atan2f( x,z );
@@ -99,6 +108,21 @@ class Vector{
 		}
 		void clear(){
 			x=y=z=0;
+		}
+		void rotateccw() {
+			const double dx = x;
+			const double dy = y;
+			x = -dy;
+			y = dx;
+		}
+		void rotatecw() {
+			const double dx = x;
+			const double dy = y;
+			x = dy;
+			y = -dx;
+		}
+		void print() {
+			cout << "x: " << x << " y: " << y << " z: " << z << endl;
 		}
 };
 

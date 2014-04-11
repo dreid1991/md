@@ -1,0 +1,61 @@
+#include "Python.h"
+#include <stdio.h>
+#include <iostream>
+#include <string>
+#include "analysis/ContourTools.h"
+#include "analysis/Bounds.h"
+#include "analysis/SphHarmTools.h"
+#include "analysis/PythonTools.h"
+#include "analysis/Atom.h"
+#include "analysis/AtomGrid.h"
+#include "analysis/AtomTools.h"
+#include "analysis/DataTools.h"
+#include "analysis/fileSpec.h"
+#include "analysis/experiment.h"
+#include "analysis/list_macro.h"
+#include "analysis/miscVDep.h"
+#include <regex>
+using namespace std;
+PythonTools pyTools;
+DataTools dataTools;
+AtomTools atomTools;
+SphHarmTools sphTools;	
+
+double xrylThresh = .45;
+double amphThresh = .35;
+int main(int argc, const char *argv[]) {
+	Py_SetProgramName((char *)"foo.py");
+	Py_Initialize();
+	PyObject *sys = PyImport_ImportModule("sys");
+	PyObject *path = PyObject_GetAttrString(sys, "path");
+	PyObject *pathAppend = PyString_FromString("../../pizza/src/");
+	PyObject *pathAppendHere = PyString_FromString(".");
+	PyObject *morePath = PyString_FromString("../../tools/");
+	PyList_Append(path, pathAppend);
+	PyList_Append(path, pathAppendHere);
+	PyList_Append(path, morePath);
+	PyObject *plt = PyImport_ImportModule("matplotlib.pyplot");
+	pyTools.setPlt(plt);
+	vector<Snap> snaps = pyTools.loadDump("path.txt", .003);
+	atomTools.assignAtomPositionHist(snaps);
+	vector<Atom *> &as = snaps[snaps.size()-1].atoms;
+	Atom *a = as[as.size()-1];
+	for (unsigned int i=0; i<a->posHist.size(); i++) {
+		cout << a->posHist[i].pos.x << ", " << a->posHist[i].pos.y << endl;
+	}
+	vector<Atom *> atoms = snaps[snaps.size()-1].atoms;
+	map<double, displacement_datum> dispDat = atomTools.calcDisplacementData(atoms);
+	for (auto it = dispDat.begin(); it!= dispDat.end(); it++) {
+		cout << "At time " << it->first << " <r^2> is " << it->second.avg << " and stdev is " << it->second.stdev << " with " << it->second.displacements.size() << " entries " << endl;
+	}
+	auto dispLast = dispDat.end();
+	dispLast--;
+
+	vector<double> disps = dispLast->second.displacements;
+	vector<double> xs;
+	vector<double> ys;
+	dataTools.hist(&disps, &xs, &ys, 20, true); 
+	PyObject_CallFunction(pyTools.plot, (char *)"OO", LISTMAPPY(double, x, xs, PyFloat_FromDouble(x)), LISTMAPPY(double, y, ys, PyFloat_FromDouble(y)));
+	PyObject_CallFunction(pyTools.show, (char *)"");
+	return 0;
+}

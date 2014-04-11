@@ -1,20 +1,57 @@
-#include "Vector.h"
-#include <vector>
-#include "SpeciesDef.h"
 #ifndef ATOM_H
 #define ATOM_H
 
+#include "Vector.h"
+#include <string>
+#include <iostream>
+#include <vector>
+#include <complex>
+#include "stamped_item.h"
+#include "timestamped_pos_def.h"
+#include <map>
+using namespace std;
 class Atom {
 	public:
-		Atom(SpeciesDef &, Vector);
-		int type;
-		int id;
-		int sig;
-		int eps;
-		Vector p;
-		Vector v;
-		Vector a;
+		Atom(double x_, double y_, string type_, int id_) : pos(Vector(x_, y_)) {
+			type = type_;
+			id = id_;
+			r = 0;
+			crystalGroup = NULL;
+			m = 1;
+		}
+		Atom(double x_, double y_, string type_, int id_, double m) : pos(Vector(x_, y_)) {
+			type = type_;
+			id = id_;
+			r = 0;
+			crystalGroup = NULL;
+			m = m;
+		}
+		vector<Atom*> neighbors;
+		vector<Vector> neighborOffsets;
+		Vector pos;	
+		double r;
+		double id;
 		double m;
-		void applyForce(Vector &);
+		vector<timestamped_pos> posHist;	
+		string type;
+		map<int, vector<complex<double> > > qms;
+		map<int, double> qs;
+		vector<Atom *> *crystalGroup;
+		Vector vToNeighbor(int i) {
+			return Vector(neighbors[i]->pos.x + neighborOffsets[i].x - pos.x, neighbors[i]->pos.y + neighborOffsets[i].y - pos.y);
+		}
+		void print() {
+			cout << "\nPrintingAtom\n";
+			cout << "id: ";
+			cout << id;
+			cout << "\ntype: ";
+			cout << type;
+			cout << "\nx: ";
+			cout << pos.x;
+			cout << "\ny: ";
+			cout << pos.y;
+			cout << "\n";
+		}
 };
+
 #endif
