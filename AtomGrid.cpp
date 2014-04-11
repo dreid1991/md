@@ -3,20 +3,28 @@
 using namespace std;
 
 
-AtomGrid::AtomGrid(vector<Atom *> *atoms_, Box box_, double dx_, double dy_): box(box_) {
+AtomGrid::AtomGrid(vector<Atom *> &atoms_, Box box_, double dx_, double dy_, double dz_): box(box_) {
 	atoms = atoms_;
 	dx = dx_;
 	dy = dy_;
+	dz = dz_;
 	nx = (unsigned int) ceil((box.xhi - box.xlo) / dx);
 	ny = (unsigned int) ceil((box.yhi - box.ylo) / dy);
-	size = Vector(box.xhi - box.xlo, box.yhi, box.ylo);
-	grid = Grid<vector<Atom *> > (nx, ny);
-	for (unsigned int i=0; i<atoms->size(); i++) {
-		unsigned int x = (int) (*atoms)[i]->pos.x / dx;
-		unsigned int y = (int) (*atoms)[i]->pos.y / dy;
-		if (x < grid.size() && y < grid[0].size()) {
-			grid[x][y].push_back((*atoms)[i]);
-		} else if ((*atoms)[i]->pos.x == size.x || (*atoms)[i]->pos.y == size.y) {
+	nz = (unsigned int) ceil((box.zhi - box.zlo) / dz);
+	size = Vector(box.xhi - box.xlo, box.yhi, box.ylo, box.zhi - boz.zlo);
+	grid = Grid<vector<Atom *> > (nx, ny, nz);
+	for (unsigned int i=0; i<atoms.size(); i++) {
+		Atom *a = atoms[i];
+		
+		if (!tryPlaceAtom(a)) {
+			loopAtom(a);
+			if (!tryPlaceAtom(a)) {
+				cout << "Can't place atom!" << endl;
+			}
+		}
+		} else {
+			
+			if ((*atoms)[i]->pos.x == size.x || (*atoms)[i]->pos.y == size.y) {
 			cout << "Looping atom from " << (*atoms)[i]->pos.x << ", " << (*atoms)[i]->pos.y << endl;
 			(*atoms)[i]->pos.x -= size.x * (int) ((*atoms)[i]->pos.x / size.x);
 			(*atoms)[i]->pos.y -= size.y * (int) ((*atoms)[i]->pos.y / size.y);
@@ -27,6 +35,22 @@ AtomGrid::AtomGrid(vector<Atom *> *atoms_, Box box_, double dx_, double dy_): bo
 		}
 	}
 }
+
+void AtomGrid::loopAtom(Atom *a) {
+	int nxShift = a->pos.x - 
+}
+
+bool AtomGrid::tryPlaceAtom(Atom *a) {
+	unsigned int x = (int) atoms->pos.x / dx;
+	unsigned int y = (int) atoms->pos.y / dy;
+	if (x < grid.nx && y < grid.ny) {
+		grid[x][y].push_back(a);
+		return true;
+	} else {
+		return false;
+	}
+}
+
 
 AtomGrid::AtomGrid() {
 

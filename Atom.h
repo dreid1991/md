@@ -12,14 +12,14 @@
 using namespace std;
 class Atom {
 	public:
-		Atom(double x_, double y_, string type_, int id_) : pos(Vector(x_, y_)) {
+		Atom(double x_, double y_, double z_, int type_, int id_) : pos(Vector(x_, y_, z_)) {
 			type = type_;
 			id = id_;
 			r = 0;
 			crystalGroup = NULL;
 			m = 1;
 		}
-		Atom(double x_, double y_, string type_, int id_, double m) : pos(Vector(x_, y_)) {
+		Atom(double x_, double y_, double z_, int type_, int id_, double m) : pos(Vector(x_, y_, z_)) {
 			type = type_;
 			id = id_;
 			r = 0;

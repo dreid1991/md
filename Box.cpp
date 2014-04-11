@@ -18,14 +18,21 @@ void Box::resize(string dim, double mult, double around) {
 }
 
 bool Box::atomInBox(Atom *a) {
-	return a->pos.x >= xlo && a->pos.x <= xhi && a->pos.y >= ylo && a->pos.y <= yhi;
+	return a->pos.x >= xlo && a->pos.x <= xhi && a->pos.y >= ylo && a->pos.y <= yhi
 }
 double Box::span(string dim) {
 	if (dim == "x") {
 		return xhi - xlo;
 	} else if (dim == "y") {
 		return yhi - ylo;
-	} 
+	} else if (dim == "z") {
+		return zhi - zlo;
+	}
 	cout << "\nBad Dim for bound span\n";
 	return 0;
+}
+
+
+void Box::loopAtom(Atom *a) {
+	int nxLoop = a->pos.x - 
 }
