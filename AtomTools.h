@@ -1,7 +1,7 @@
 #ifndef ATOMTOOLS_H
 #define ATOMTOOLS_H
 #include "Python.h"
-#include "Bounds.h"
+#include "Box.h"
 #include "math.h"
 #include "Atom.h"
 #include <climits>
@@ -27,10 +27,10 @@ class AtomTools {
 	void calcMobilityProfile(MobilityProfile &, vector<Atom *> &, int);
 	public:
 		AtomTools(){}
-		vector<Atom *> inBounds(vector<Atom *> *atoms, Bounds b);
-		vector<Atom *> inBounds(vector<Atom> *atoms, Bounds b);
+		vector<Atom *> inBox(vector<Atom *> *atoms, Box b);
+		vector<Atom *> inBox(vector<Atom> *atoms, Box b);
 		void assignPositionHist(vector<Snap> &);
-		Bounds findBounds(vector<Atom *> *);
+		Box findBounds(vector<Atom *> *);
 
 		vector<double> crystalGroupsTilt(vector<vector <Atom *> *> &crystalGroups);
 		double crystalGroupTilt(vector<Atom *> &crystalGroup);
@@ -51,8 +51,8 @@ class AtomTools {
 		double avgQ(vector<Atom *> *, int q);
 		double testNeighborsFrac(vector<Atom *> *, bool(*) (Atom *), bool(*) (Atom *, Atom *));
 		void assignAtomPositionHist(vector<Snap> &);
-		void loopPositionHists(vector<Atom *> &, Bounds);
-		void loopAtomHist(vector<timestamped_pos> &, unsigned int curAtomIdx, Bounds &, bool, bool);
+		void loopPositionHists(vector<Atom *> &, Box);
+		void loopAtomHist(vector<timestamped_pos> &, unsigned int curAtomIdx, Box &, bool, bool);
 
 		
 		vector<stamped_item<double, MobilityProfile> > calcMobilityProfiles(vector<Atom *> &, double, double, double); 

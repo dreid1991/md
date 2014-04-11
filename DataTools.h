@@ -5,7 +5,7 @@
 #include <iostream>
 #include <map>
 #include "math.h"
-#include "Bounds.h"
+#include "Box.h"
 #include "Atom.h"
 #include <algorithm>
 using namespace std;

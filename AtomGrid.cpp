@@ -3,13 +3,13 @@
 using namespace std;
 
 
-AtomGrid::AtomGrid(vector<Atom *> *atoms_, Bounds bounds_, double dx_, double dy_): bounds(bounds_) {
+AtomGrid::AtomGrid(vector<Atom *> *atoms_, Box box_, double dx_, double dy_): box(box_) {
 	atoms = atoms_;
 	dx = dx_;
 	dy = dy_;
-	nx = (unsigned int) ceil((bounds.xhi - bounds.xlo) / dx);
-	ny = (unsigned int) ceil((bounds.yhi - bounds.ylo) / dy);
-	size = Vector(bounds.xhi - bounds.xlo, bounds.yhi, bounds.ylo);
+	nx = (unsigned int) ceil((box.xhi - box.xlo) / dx);
+	ny = (unsigned int) ceil((box.yhi - box.ylo) / dy);
+	size = Vector(box.xhi - box.xlo, box.yhi, box.ylo);
 	grid = Grid<vector<Atom *> > (nx, ny);
 	for (unsigned int i=0; i<atoms->size(); i++) {
 		unsigned int x = (int) (*atoms)[i]->pos.x / dx;
@@ -59,7 +59,7 @@ Vector AtomGrid::sqrPosition(vector <Atom*> *sqr) {
 	for (unsigned int i=0; i<grid.size(); i++) {
 		for (unsigned int j=0; j<grid[i].size(); j++) {
 			if (&grid[i][j] == sqr) {
-				return Vector(bounds.xlo + dx * i, bounds.ylo + dy * j);
+				return Vector(box.xlo + dx * i, box.ylo + dy * j);
 			}
 		}
 	}
@@ -167,8 +167,8 @@ void AtomGrid::assignNeighborsFromSqr(Atom *a, vector<Atom *> *gridSqr, Vector o
 }
 
 void AtomGrid::sqrIdx(int *xIdx, int *yIdx, double x, double y) {
-	(*xIdx) = (int) (((x - bounds.xlo) / dx));
-	(*yIdx) = (int) (((y - bounds.ylo) / dy));
+	(*xIdx) = (int) (((x - box.xlo) / dx));
+	(*yIdx) = (int) (((y - box.ylo) / dy));
 }
 
 void AtomGrid::assignNeighborsAtom(Atom *a, square_offset *sqrOffs, double rSqr) {

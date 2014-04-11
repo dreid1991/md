@@ -1,23 +1,27 @@
+#include "Python.h"
+#include <stdio.h>
 #include <iostream>
-#include <vector>
-#include "Vector.h"
-#include "Atom.h"
+#include <string>
 #include "Box.h"
-#include <map>
-#include "CreateAtoms.h"
-#include "SPECIESDEFS.h"
-#include "SpeciesDef.h"
-#include "PARMS.h"
+#include "PythonTools.h"
+#include "Atom.h"
+#include "AtomGrid.h"
+#include "AtomTools.h"
+//#include "DataTools.h"
+#include "list_macro.h"
+#include "geometry_defs.h"
+#include <regex>
+
+
 using namespace std;
-map<int, SpeciesDef> PARMS::SPECIESDEFS;
+PythonTools pyTools;
+DataTools dataTools;
+AtomTools atomTools;
 
-int main() {
-	asserts::assertSpeciesDefs();
-	CreateAtoms createAtoms = CreateAtoms();
-	Vector origin = Vector(0, 0, 0);
-	Vector trace = Vector(10, 10, 10);
-	Box bounds = Box(origin, trace);
-	vector<Atom> atoms = createAtoms.box(bounds, 1, 10);
-
-
+int main(int argc, const char *argv[]) {
+	dataFileName = "lalala";
+	InputData inputs = readInputData(dataFileName);
+	vector<Atom *> atoms = inputs.atoms;
+	Box box = inputs.box;
+	return 0;
 }

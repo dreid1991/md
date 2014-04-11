@@ -2,11 +2,11 @@
 #define SNAP_H
 #include "Atom.h"
 #include <vector>
-#include "Bounds.h"
+#include "Box.h"
 using namespace std;
 struct Snap {
 	vector<Atom *> atoms;
-	Bounds bounds;
+	Box box;
 	double timestamp;
 };
 #endif

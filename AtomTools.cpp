@@ -116,7 +116,7 @@ vector<Polygon> AtomTools::voronoiPolygons(PyObject *voronoiData, vector<vector<
 
 
 
-Bounds AtomTools::findBounds(vector<Atom *> *atoms) {
+Box AtomTools::findBounds(vector<Atom *> *atoms) {
 	double xlo = INFINITY;
 	double xhi = -INFINITY;
 	double ylo = INFINITY;
@@ -127,7 +127,7 @@ Bounds AtomTools::findBounds(vector<Atom *> *atoms) {
 		ylo = fmin((*atoms)[i]->pos.y, ylo);
 		yhi = fmax((*atoms)[i]->pos.y, yhi);
 	}
-	return Bounds(xlo, xhi, ylo, yhi);
+	return Box(xlo, xhi, ylo, yhi);
 }
 
 
@@ -138,7 +138,7 @@ void AtomTools::removeAtom(Atom *a, vector<Atom *> *as) {
 	} 
 }
 
-void AtomTools::loopAtomHist(vector<timestamped_pos> &tsps, unsigned int curTspIdx, Bounds &b, bool loopX, bool loopY) {
+void AtomTools::loopAtomHist(vector<timestamped_pos> &tsps, unsigned int curTspIdx, Box &b, bool loopX, bool loopY) {
 	timestamped_pos &cur = tsps[curTspIdx];
 	timestamped_pos &prev = tsps[curTspIdx-1]; 
 	Vector offset;
@@ -172,7 +172,7 @@ void AtomTools::loopAtomHist(vector<timestamped_pos> &tsps, unsigned int curTspI
 	}
 }
 
-void AtomTools::loopPositionHists(vector<Atom *> &lastAtoms, Bounds b) {
+void AtomTools::loopPositionHists(vector<Atom *> &lastAtoms, Box b) {
 	double xSpan = b.span("x");
 	double ySpan = b.span("y");
 	for (unsigned int i=0; i<lastAtoms.size(); i++) {
@@ -205,8 +205,8 @@ void AtomTools::assignAtomPositionHist(vector<Snap> &snaps) {
 			last.atoms[j]->posHist.push_back(tsp);	
 		}
 	}
-	Bounds assumedBounds = snaps[snaps.size()-1].bounds;
-	loopPositionHists(last.atoms, assumedBounds);
+	Box assumedBox = snaps[snaps.size()-1].box;
+	loopPositionHists(last.atoms, assumedBox);
 }
 
 void AtomTools::calcMobilityProfile(MobilityProfile &profile, vector<Atom *> &atoms, int stepIdx) {
@@ -339,10 +339,10 @@ vector<vector<Atom *> *> AtomTools::assignCrystalGroups(vector<Atom *> seeds, in
 }
 
 
-vector<Atom *> AtomTools::inBounds(vector<Atom*> *atoms, Bounds b) {
+vector<Atom *> AtomTools::inBox(vector<Atom*> *atoms, Box b) {
 	vector<Atom *> passed;
 	for (unsigned int i=0; i<atoms->size(); i++) {
-		if (b.atomInBounds((*atoms)[i])) {
+		if (b.atomInBox((*atoms)[i])) {
 			passed.push_back((*atoms)[i]);
 		}
 	}

@@ -1,15 +1,33 @@
+#ifndef BOUNDS_H
+#define BOUNDS_H
 #include "Vector.h"
-
-#ifndef BOX_H
-#define BOX_H
-
-class Box{
+#include <string>
+#include "Atom.h"
+using namespace std;
+class Box {
 	public:
-		Box(Vector &, Vector &);
-		Vector origin;
+		double xlo;
+		double xhi;
+		double ylo;
+		double yhi;	
+		Box() {
+			xlo = 0;
+			xhi = 0;
+			ylo = 0;
+			yhi = 0;
+		}
+		Box(double xlo_, double xhi_, double ylo_, double yhi_) {
+			xlo = xlo_;
+			xhi = xhi_;
+			ylo = ylo_;
+			yhi = yhi_;
+			trace = Vector(xhi - xlo, yhi - ylo);
+		}
 		Vector trace;
-		bool inside(Vector &);
-		Vector randV();
+		double span(string dim);
+		bool atomInBox(Atom *);
+		void resize(string dim, double mult, double around);
+
 };
 
 #endif

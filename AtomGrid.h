@@ -3,7 +3,7 @@
 #include "Atom.h"
 #include <vector>
 #include "Vector.h"
-#include "Bounds.h"
+#include "Box.h"
 #include "Grid.h"
 #include "math.h"
 #include <iostream>
@@ -18,7 +18,7 @@ class AtomGrid {
 	public:
 		Grid<vector<Atom *> > grid;
 		square_offset getNeighborSquares(int initX, int initY, bool loopX, bool loopY);
-		Bounds bounds;
+		Box box;
 		double dx;
 		double dy;
 		unsigned int nx;
@@ -36,7 +36,7 @@ class AtomGrid {
 		vector<Atom *> *atoms;
 		double findRadius(map<string, double> relRadii);
 		AtomGrid();	
-		AtomGrid(vector<Atom *> *atoms, Bounds bounds, double dx, double dy);
+		AtomGrid(vector<Atom *> *atoms, Box bounds, double dx, double dy);
 	//vector<vector<vector<Atom *> > > makeEmptyGrid(int nx, int ny);
 		void assignNeighborsFromSqr(Atom *a, vector<Atom*>*sqr, Vector offset, double rSqr);
 		void assignNeighbors(double rThresh, bool loopX, bool loopY);

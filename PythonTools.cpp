@@ -227,7 +227,7 @@ vector<Snap> PythonTools::loadDump(string fn, double timestep) {
 			
 		}
 		sort(s->atoms.begin(), s->atoms.end(), atomIdLess);
-		s->bounds = Bounds(xlo, xhi, ylo, yhi);
+		s->box= Box(xlo, xhi, ylo, yhi);
 	}
 	fclose(fr);
 	return snaps;

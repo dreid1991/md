@@ -14,7 +14,6 @@
 //#include <regex>
 #include <dirent.h>
 #include <sys/types.h>
-#include "fileSpec.h"
 #include <sstream>
 #include <stdio.h>
 #include <iostream>
