@@ -338,6 +338,38 @@ vector<vector<Atom *> *> AtomTools::assignCrystalGroups(vector<Atom *> seeds, in
 	return grps;
 }
 
+void assignNeighFromSquares(Grid<vector<Atom *> > &grid, Atom *a, int xIdx, int yIdx, int zIdx) {
+	for (int dx=-1; dx<=1; dx++) {
+		for (int dy=-1; dy<=1; dy++) {
+			for (int dz=-1; dz<=1; dz++) {
+				int x = xIdx + dx - (int) grid.nx * floor((xIdx + dx) / grid.nx);
+				int y = yIdx + dy - (int) grid.ny * floor((yIdx + dy) / grid.ny);
+				int z = zIdx + dz - (int) grid.nz * floor((zIdx + dz) / grid.nz);
+				vector<Atom *> &gridSqr = grid[x][y][z];
+				a->neighbors.erase(a->neighbors.begin(), a->neighbors.end());
+				a->neighbors.insert(a->neighbors.end(), gridSqr.begin(), gridSqr.end());
+			}
+		}
+	}
+}
+
+void AtomTools::assignNeighbors(vector<Atom *> atoms, double neighCut, Box box) {
+	int nx = ceil(box.trace.x / (2 * neighCut));
+	int ny = ceil(box.trace.y / (2 * neighCut));
+	int nz = ceil(box.trace.z / (2 * neighCut));
+	double gridDim = 2 * neighCut;
+	Grid<vector<Atom *> > grid = Grid(nx, ny, nz);
+	for (unsigned int i=0; i<atoms.size(); i++) {
+		Atom *a = atoms[i];
+		box.loopIntoBox(a);
+		int xIdx = (a->pos.x - box.xlo) / gridDim
+		int yIdx = (a->pos.y - box.ylo) / gridDim
+		int zIdx = (a->pos.z - box.zlo) / gridDim
+		assignNeighFromSquares(grid, a, xIdx, yIdx, zIdx);	
+		grid[xIdx][yIdx][zIdx].push_back(a);
+		a->posWhenGrid = a->pos;
+	}
+}
 
 vector<Atom *> AtomTools::inBox(vector<Atom*> *atoms, Box b) {
 	vector<Atom *> passed;

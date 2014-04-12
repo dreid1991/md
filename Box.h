@@ -33,7 +33,7 @@ class Box {
 		double span(string dim);
 		bool atomInBox(Atom *);
 		void resize(string dim, double mult, double around);
-		void loopAtom(Atom *);
+		void loopIntoBox(Atom *);
 
 };
 

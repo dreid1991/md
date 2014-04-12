@@ -14,6 +14,11 @@ void Box::resize(string dim, double mult, double around) {
 		origin = ylo + around * (yhi - ylo);
 		yhi = mult * (yhi - origin) + origin;
 		ylo = mult * (ylo - origin) + origin;
+	} else if (dim == "z") {
+		origin = zlo + around * (zhi - zlo);
+
+		zhi = mult * (zhi - origin) + origin;
+		zlo = mult * (zlo - origin) + origin;
 	}
 }
 
@@ -33,6 +38,12 @@ double Box::span(string dim) {
 }
 
 
-void Box::loopAtom(Atom *a) {
-	int nxLoop = a->pos.x - 
+void Box::loopIntoBox(Atom *a) {
+	int nxLoop = floor((a->pos.x - xlo) / trace.x) 
+	int nyLoop = floor((a->pos.y - ylo) / trace.y) 
+	int nzLoop = floor((a->pos.z - zlo) / trace.z) 
+
+	a->pos.x -= nxLoop * trace.x;
+	a->pos.y -= nyLoop * trace.y;
+	a->pos.z -= nzLoop * trace.z;
 }

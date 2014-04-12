@@ -29,6 +29,7 @@ class Atom {
 		vector<Atom*> neighbors;
 		vector<Vector> neighborOffsets;
 		Vector pos;	
+		Vector posWhenGrid;
 		double r;
 		double id;
 		double m;

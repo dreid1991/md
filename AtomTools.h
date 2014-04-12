@@ -31,7 +31,9 @@ class AtomTools {
 		vector<Atom *> inBox(vector<Atom> *atoms, Box b);
 		void assignPositionHist(vector<Snap> &);
 		Box findBounds(vector<Atom *> *);
-
+		
+		void assignNeighbors(vector<Atom *>, double, Box);
+		void assignNeighsFromSquares(Grid<vector<Atom *> >, Atom *, int, int, int);
 		vector<double> crystalGroupsTilt(vector<vector <Atom *> *> &crystalGroups);
 		double crystalGroupTilt(vector<Atom *> &crystalGroup);
 		

@@ -24,6 +24,6 @@ int main(int argc, const char *argv[]) {
 	double maxCutoff = intputs.maxCutoff;
 	vector<Atom *> atoms = inputs.atoms;
 	Box box = inputs.box;
-	runNVE(atoms, box, 10, 2*maxCutoff);
+	runNVE(atoms, box, 10, maxCutoff);
 	return 0;
 }

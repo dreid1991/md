@@ -1,7 +1,7 @@
 #include "runNVE.h"
 
 
-void runNVE(vector<Atom *> &atoms, Box &box, int numTurns, double gridSize) {
+void runNVE(vector<Atom *> &atoms, Box &box, int numTurns, double ljcut) {
 	runInitStep(atoms, box);
 	numTurns--;
 	for (int i=0; i<numTurns; i++) {
