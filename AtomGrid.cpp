@@ -3,7 +3,7 @@
 using namespace std;
 
 
-AtomGrid::AtomGrid(vector<Atom *> &atoms_, Box box_, double dx_, double dy_, double dz_): box(box_) {
+AtomGrid::AtomGrid(vector<Atom *> &atoms_, Box box_, double dx_, double dy_, double dz_, bool atomsAreOnGrid): box(box_) {
 	atoms = atoms_;
 	dx = dx_;
 	dy = dy_;
@@ -11,83 +11,55 @@ AtomGrid::AtomGrid(vector<Atom *> &atoms_, Box box_, double dx_, double dy_, dou
 	nx = (unsigned int) ceil((box.xhi - box.xlo) / dx);
 	ny = (unsigned int) ceil((box.yhi - box.ylo) / dy);
 	nz = (unsigned int) ceil((box.zhi - box.zlo) / dz);
-	size = Vector(box.xhi - box.xlo, box.yhi, box.ylo, box.zhi - boz.zlo);
+	size = Vector(box.xhi - box.xlo, box.yhi - box.ylo, box.zhi - box.zlo);
 	grid = Grid<vector<Atom *> > (nx, ny, nz);
-	for (unsigned int i=0; i<atoms.size(); i++) {
-		Atom *a = atoms[i];
-		
-		if (!tryPlaceAtom(a)) {
-			loopAtom(a);
-			if (!tryPlaceAtom(a)) {
-				cout << "Can't place atom!" << endl;
-			}
-		}
-		} else {
-			
-			if ((*atoms)[i]->pos.x == size.x || (*atoms)[i]->pos.y == size.y) {
-			cout << "Looping atom from " << (*atoms)[i]->pos.x << ", " << (*atoms)[i]->pos.y << endl;
-			(*atoms)[i]->pos.x -= size.x * (int) ((*atoms)[i]->pos.x / size.x);
-			(*atoms)[i]->pos.y -= size.y * (int) ((*atoms)[i]->pos.y / size.y);
-			cout << "Looped atom to " << (*atoms)[i]->pos.x << ", " << (*atoms)[i]->pos.y << endl;
-		} else {
-			cout << "Atom off grid" << endl;
-			(*atoms)[i]->print();
-		}
-	}
-}
+	//plan: make dense grid (one with 2 * cutoff spacing)
+	//make grid with spacing of CPU sectors.  dense grid cells must fall exactly into one CPU grid sector
+	//populate CPU sector grid with atoms.  
+	//Take these CPU sector atom lists and populate the dense grid.  Add one atom at a time and add to neighbor lists.  
+	//Do not deal with ghost particles in this step
+	//Let all finish gridding
+	//Now we must build ghost lists
+	//for now, have each CPU run along border cells and add neighbors to its own atoms.
+	if (atomsAreOnGrid) {
+		for (unsigned int i=0; i<atoms.size(); i++) {
+			Atom *a = atoms[i];
 
-void AtomGrid::loopAtom(Atom *a) {
-	int nxShift = a->pos.x - 
-}
-
-bool AtomGrid::tryPlaceAtom(Atom *a) {
-	unsigned int x = (int) atoms->pos.x / dx;
-	unsigned int y = (int) atoms->pos.y / dy;
-	if (x < grid.nx && y < grid.ny) {
-		grid[x][y].push_back(a);
-		return true;
+			int x = (a->pos.x - box.xlo) / box.trace.x;
+			int y = (a->pos.y - box.ylo) / box.trace.y;
+			int z = (a->pos.z - box.zlo) / box.trace.z;
+			grid[x][y][z].push_back(a);
+		}
 	} else {
-		return false;
+		for (unsigned int i=0; i<atoms.size(); i++) {
+			Atom *a = atoms[i];
+			int x = floor((a->pos.x - box.xlo) / box.trace.x);
+			int y = floor((a->pos.y - box.ylo) / box.trace.y);
+			int z = floor((a->pos.z - box.zlo) / box.trace.z);
+			int dx = -floor(x / nx);
+			int dy = -floor(y / ny);
+			int dz = -floor(z / nz);
+			a->pos.x += dx * box.trace.x;
+			a->pos.y += dy * box.trace.y;
+			a->pos.z += dz * box.trace.z;
+			grid[x][y][z].push_back(a);
+		}
 	}
 }
-
-
 AtomGrid::AtomGrid() {
 
 }
-
-double AtomGrid::getMaxY(vector<Atom *> &as) {
-	double maxY = -10000;
-	for (unsigned i=0; i < as.size(); i++) {
-		maxY = max(maxY, as[i]->pos.y);
-	}
-	return maxY;
-}
-
-
-double AtomGrid::avgSurfaceY() {
-	vector<double> maxYs;
-	for (int x=0; x<grid.nx; x++) {
-		for (int y = grid.ny-1; y>=0; y--) {
-			if (grid[x][y].size()) {
-				maxYs.push_back(getMaxY(grid[x][y]));
-				cout << maxYs[maxYs.size() - 1] << endl;
-				break;
-			}
-		}
-	}
-	return average(maxYs);
-}
-
 Vector AtomGrid::sqrPosition(vector <Atom*> *sqr) {
 	for (unsigned int i=0; i<grid.size(); i++) {
 		for (unsigned int j=0; j<grid[i].size(); j++) {
-			if (&grid[i][j] == sqr) {
-				return Vector(box.xlo + dx * i, box.ylo + dy * j);
+			for (unsigned int k=0; k<grid[i][j].size(); k++) {
+				if (&grid[i][j][k] == sqr) {
+					return Vector(box.xlo + dx * i, box.ylo + dy * j, box.zlo + dz * k);
+				}
 			}
 		}
 	}
-	return Vector(-1, -1);
+	return Vector(-1, -1, -1);
 }
 
 void AtomGrid::printAtom(Atom *a) {
@@ -105,116 +77,7 @@ void AtomGrid::printAtom(Atom *a) {
 
 
 
-double AtomGrid::findRadius(map<string, double> relRadii) {
-	if (radii.find(relRadii) == radii.end()) {
-		const unsigned int step = 2; //because who needs to check all of them?
-		double radius = 0;
-		int numAtomsUsed = 0;
-		for (unsigned int i=0; i<atoms->size(); i+=step) {
-			Atom *a = (*atoms)[i];
-			vector<Atom *> *neighbors = &a->neighbors;
-			vector<Vector> *offsets = &a->neighborOffsets;
-			double minNeighborRad = INFINITY;
-	
-			for (unsigned int nIdx=0; nIdx<neighbors->size(); nIdx++) {
-				double dist = a->pos.dist((*neighbors)[nIdx]->pos + (*offsets)[nIdx]);
-				double rad = dist / (relRadii[a->type] + relRadii[(*neighbors)[nIdx]->type]);
-				minNeighborRad = fmin(minNeighborRad, rad);
-			}
-			if (minNeighborRad != INFINITY) {
-				radius = radius * numAtomsUsed / (numAtomsUsed + 1) + minNeighborRad / (numAtomsUsed + 1);
-			}
-		}
-		radii[relRadii] = radius;
-		return radius;
-	} else {
-		return radii[relRadii];
-	}
-}
 
-square_offset AtomGrid::getNeighborSquares(int initX, int initY, bool loopX, bool loopY) {
-	vector<vector<Atom *> *> gridSqrs;
-	vector<Vector> offsets;
-	for (int x=initX-1; x<=initX+1; x++) {
-		for (int y=initY-1; y<=initY+1; y++) {
-			int flrX = 0;
-			int flrY = 0;
-			if (x < 0) {
-				flrX = -1;
-			} else if (x >= (signed int) nx) {
-				flrX = 1;
-			}
-			if (y < 0) {
-				flrY = -1;
-			} else if (y >= (signed int) ny) {
-				flrY = -1;
-			}
-
-			bool appendMe;
-			if (flrX && flrY) {
-				appendMe = loopX && loopY;
-			} else if (flrY) {
-				appendMe = loopY;
-			} else if (flrX) {
-				appendMe = loopX;
-			} else {
-				appendMe = true;
-			}
-			if (appendMe) {
-				double offsetX = flrX * size.x;
-				double offsetY = flrY * size.y;
-				int offsetIdxX = x - flrX * nx;
-				int offsetIdxY = y - flrY * ny;
-				gridSqrs.push_back(&grid[offsetIdxX][offsetIdxY]);
-				Vector offset = Vector(offsetX, offsetY);
-
-				offsets.push_back(offset);
-			}
-		}
-	}
-	square_offset toReturn;
-	toReturn.gridSqrs = gridSqrs;
-	toReturn.offsets = offsets;
-	return toReturn;
-}
-
-void AtomGrid::assignNeighborsFromSqr(Atom *a, vector<Atom *> *gridSqr, Vector offset, double rSqr) {
-	int len = gridSqr->size();
-	for (int i=0; i<len; i++) {
-		Atom *neighbor = (*gridSqr)[i];
-		Vector neighborPos = Vector(neighbor->pos.x + offset.x, neighbor->pos.y + offset.y);
-		if (a->pos.distSqr(neighborPos) < rSqr && a != neighbor) {
-			a->neighbors.push_back(neighbor);
-			a->neighborOffsets.push_back(offset);
-		}
-	}
-}
-
-void AtomGrid::sqrIdx(int *xIdx, int *yIdx, double x, double y) {
-	(*xIdx) = (int) (((x - box.xlo) / dx));
-	(*yIdx) = (int) (((y - box.ylo) / dy));
-}
-
-void AtomGrid::assignNeighborsAtom(Atom *a, square_offset *sqrOffs, double rSqr) {
-	vector<vector<Atom *> *> *gridSqrs = &(*sqrOffs).gridSqrs;
-	vector<Vector> *offsets = &(*sqrOffs).offsets;
-	for (unsigned int i=0; i<gridSqrs->size(); i++) {
-		assignNeighborsFromSqr(a, (*gridSqrs)[i], (*offsets)[i], rSqr);
-	}
-}
-
-void AtomGrid::assignNeighbors(double rThresh, bool loopX, bool loopY) {
-	double rSqr = rThresh * rThresh;
-	for (unsigned int x=0; x<nx; x++) {
-		for (unsigned int y=0; y<ny; y++) {
-			vector<Atom *> *gridSqr = &grid[x][y];
-			square_offset sqrOffs = getNeighborSquares(x, y, loopX, loopY);
-			for (unsigned int i=0; i<gridSqr->size(); i++) {
-				assignNeighborsAtom((*gridSqr)[i], &sqrOffs, rSqr);
-			}
-		}
-	}
-}
 
 
 

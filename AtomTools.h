@@ -7,6 +7,7 @@
 #include <climits>
 #include <vector>
 #include <algorithm>
+#include "Grid.h"
 #include "PythonTools.h"
 #include <iostream>
 #include "Snap.h"

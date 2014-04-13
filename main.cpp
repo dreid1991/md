@@ -21,7 +21,7 @@ AtomTools atomTools;
 int main(int argc, const char *argv[]) {
 	dataFileName = "lalala";
 	InputData inputs = readInputData(dataFileName);
-	double maxCutoff = intputs.maxCutoff;
+	double maxCutoff = inputs.maxCutoff;
 	vector<Atom *> atoms = inputs.atoms;
 	Box box = inputs.box;
 	runNVE(atoms, box, 10, maxCutoff);

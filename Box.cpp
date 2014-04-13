@@ -23,7 +23,7 @@ void Box::resize(string dim, double mult, double around) {
 }
 
 bool Box::atomInBox(Atom *a) {
-	return a->pos.x >= xlo && a->pos.x <= xhi && a->pos.y >= ylo && a->pos.y <= yhi
+	return a->pos.x >= xlo && a->pos.x <= xhi && a->pos.y >= ylo && a->pos.y <= yhi;
 }
 double Box::span(string dim) {
 	if (dim == "x") {
@@ -39,9 +39,9 @@ double Box::span(string dim) {
 
 
 void Box::loopIntoBox(Atom *a) {
-	int nxLoop = floor((a->pos.x - xlo) / trace.x) 
-	int nyLoop = floor((a->pos.y - ylo) / trace.y) 
-	int nzLoop = floor((a->pos.z - zlo) / trace.z) 
+	int nxLoop = floor((a->pos.x - xlo) / trace.x);
+	int nyLoop = floor((a->pos.y - ylo) / trace.y); 
+	int nzLoop = floor((a->pos.z - zlo) / trace.z);
 
 	a->pos.x -= nxLoop * trace.x;
 	a->pos.y -= nyLoop * trace.y;

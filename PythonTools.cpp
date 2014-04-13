@@ -190,7 +190,7 @@ vector<Snap> PythonTools::loadDump(string fn, double timestep) {
 	char line[150];
 	vector<string> lines;
 	Snap *s;
-	double xlo, xhi, ylo, yhi;
+	double xlo, xhi, ylo, yhi, zlo, zhi;
 	
 	while(fgets(line, 150, fr) != NULL) {
 		Snap ss;
@@ -211,23 +211,25 @@ vector<Snap> PythonTools::loadDump(string fn, double timestep) {
 		ylo = ys[0];
 		yhi = ys[1];	
 		fgets(line, 150, fr);
+		vector<double> zs = getNums(cutLineEnd(string(line)));
+		zlo = zs[0];
+		zhi = zs[1];
 		fgets(line, 150, fr);
 		for (int i=0; i<numAtoms; i++) {
 			fgets(line, 150, fr);
 			vector<double> atomBits = getNums(cutLineEnd(string(line)));
 			double x = xlo + (xhi - xlo) * atomBits[2];
 			double y = ylo + (yhi - ylo) * atomBits[3];
-			ostringstream strs;
-			strs << atomBits[1];
+			double z = zlo + (zhi - zlo) * atomBits[4];
+			int type = (int) atomBits[1];
 			
-			string type = strs.str();
 			int id = (int) atomBits[0];
-			Atom *a = new Atom(x, y, type, id);
+			Atom *a = new Atom(x, y, z, type, id, 1.0); //placeholder mass
 			s->atoms.push_back(a);
 			
 		}
 		sort(s->atoms.begin(), s->atoms.end(), atomIdLess);
-		s->box= Box(xlo, xhi, ylo, yhi);
+		s->box= Box(xlo, xhi, ylo, yhi, zlo, zhi);
 	}
 	fclose(fr);
 	return snaps;

@@ -17,30 +17,24 @@ using namespace std;
 class AtomGrid {
 	public:
 		Grid<vector<Atom *> > grid;
-		square_offset getNeighborSquares(int initX, int initY, bool loopX, bool loopY);
 		Box box;
 		double dx;
 		double dy;
+		double dz;
 		unsigned int nx;
 		unsigned int ny;
-		
-		vector<vector<Atom *> > &operator[](int x) {
+		unsigned int nz;
+		vector<vector<vector<Atom *> > > &operator[](int x) {
 			return grid[x];
 		}
-		double getMaxY(vector<Atom *> &);
-		double avgSurfaceY();
+
 
 		map<map<string, double>, double> radii;
-		void sqrIdx(int *, int *, double x, double y); 
 		Vector size;
-		vector<Atom *> *atoms;
-		double findRadius(map<string, double> relRadii);
+		vector<Atom *> atoms;
 		AtomGrid();	
-		AtomGrid(vector<Atom *> &atoms, Box bounds, double dx, double dy);
+		AtomGrid(vector<Atom *> &atoms, Box bounds, double dx, double dy, double dz, bool);
 	//vector<vector<vector<Atom *> > > makeEmptyGrid(int nx, int ny);
-		void assignNeighborsFromSqr(Atom *a, vector<Atom*>*sqr, Vector offset, double rSqr);
-		void assignNeighbors(double rThresh, bool loopX, bool loopY);
-		void assignNeighborsAtom(Atom *a, square_offset *sqrOffs, double rSqr);
 		void printAtom(Atom *a);
 		Vector sqrPosition(vector<Atom *> *);
 

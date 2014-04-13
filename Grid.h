@@ -28,7 +28,7 @@ class Grid {
 						T sqr;
 						ycol.push_back(sqr);
 					}
-					xslices.push_back(ycol);
+					xslice.push_back(ycol);
 				}
 				xslices.push_back(xslice);
 		

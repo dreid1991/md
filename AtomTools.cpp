@@ -121,13 +121,17 @@ Box AtomTools::findBounds(vector<Atom *> *atoms) {
 	double xhi = -INFINITY;
 	double ylo = INFINITY;
 	double yhi = -INFINITY;
+	double zlo = INFINITY;
+	double zhi = -INFINITY;
 	for (unsigned int i=0; i<atoms->size(); i++) {
 		xlo = fmin((*atoms)[i]->pos.x, xlo);
 		xhi = fmax((*atoms)[i]->pos.x, xhi);
 		ylo = fmin((*atoms)[i]->pos.y, ylo);
 		yhi = fmax((*atoms)[i]->pos.y, yhi);
+		zlo = fmin((*atoms)[i]->pos.z, zlo);
+		zhi = fmax((*atoms)[i]->pos.z, zhi);
 	}
-	return Box(xlo, xhi, ylo, yhi);
+	return Box(xlo, xhi, ylo, yhi, zlo, zhi);
 }
 
 
@@ -358,13 +362,13 @@ void AtomTools::assignNeighbors(vector<Atom *> atoms, double neighCut, Box box) 
 	int ny = ceil(box.trace.y / (2 * neighCut));
 	int nz = ceil(box.trace.z / (2 * neighCut));
 	double gridDim = 2 * neighCut;
-	Grid<vector<Atom *> > grid = Grid(nx, ny, nz);
+	Grid<vector<Atom *> > grid = Grid<vector<Atom *> >(nx, ny, nz);
 	for (unsigned int i=0; i<atoms.size(); i++) {
 		Atom *a = atoms[i];
 		box.loopIntoBox(a);
-		int xIdx = (a->pos.x - box.xlo) / gridDim
-		int yIdx = (a->pos.y - box.ylo) / gridDim
-		int zIdx = (a->pos.z - box.zlo) / gridDim
+		int xIdx = (a->pos.x - box.xlo) / gridDim;
+		int yIdx = (a->pos.y - box.ylo) / gridDim;
+		int zIdx = (a->pos.z - box.zlo) / gridDim;
 		assignNeighFromSquares(grid, a, xIdx, yIdx, zIdx);	
 		grid[xIdx][yIdx][zIdx].push_back(a);
 		a->posWhenGrid = a->pos;
