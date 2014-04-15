@@ -24,19 +24,22 @@ class AtomGrid {
 		unsigned int nx;
 		unsigned int ny;
 		unsigned int nz;
+	//	vector<vector<Atom *> *> sqrs;
 		vector<vector<vector<Atom *> > > &operator[](int x) {
 			return grid[x];
 		}
-
+		Box getSquareBox(int, int int);
 
 		map<map<string, double>, double> radii;
 		Vector size;
 		vector<Atom *> atoms;
 		AtomGrid();	
 		AtomGrid(vector<Atom *> &atoms, Box bounds, double dx, double dy, double dz, bool);
+		AtomGrid(Box, double dx, double dy, double dz);
 	//vector<vector<vector<Atom *> > > makeEmptyGrid(int nx, int ny);
 		void printAtom(Atom *a);
 		Vector sqrPosition(vector<Atom *> *);
+		void populateAssignNeigh(vector<Atom *>, double cut);
 
 
 };

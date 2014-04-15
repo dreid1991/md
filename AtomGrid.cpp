@@ -13,6 +13,13 @@ AtomGrid::AtomGrid(vector<Atom *> &atoms_, Box box_, double dx_, double dy_, dou
 	nz = (unsigned int) ceil((box.zhi - box.zlo) / dz);
 	size = Vector(box.xhi - box.xlo, box.yhi - box.ylo, box.zhi - box.zlo);
 	grid = Grid<vector<Atom *> > (nx, ny, nz);
+/*	for (unsigned int i=0; i<nx; i++) {
+		for (unsigned int j=0; j<ny; j++) {
+			for (unsigned int k=0; k<nz; k++) {
+				sqrs.push_back(&grid[i][j][k]);
+			}
+		}
+	}*/
 	//plan: make dense grid (one with 2 * cutoff spacing)
 	//make grid with spacing of CPU sectors.  dense grid cells must fall exactly into one CPU grid sector
 	//populate CPU sector grid with atoms.  
@@ -49,10 +56,55 @@ AtomGrid::AtomGrid(vector<Atom *> &atoms_, Box box_, double dx_, double dy_, dou
 AtomGrid::AtomGrid() {
 
 }
+AtomGrid::AtomGrid(Box box, int dx_, int dy_, int dz_) {
+	dx = dx_;
+	dy = dy_;
+	dz = dz_;
+	nx = (unsigned int) ceil((box.xhi - box.xlo) / dx);
+	ny = (unsigned int) ceil((box.yhi - box.ylo) / dy);
+	nz = (unsigned int) ceil((box.zhi - box.zlo) / dz);
+	size = Vector(box.xhi - box.xlo, box.yhi - box.ylo, box.zhi - box.zlo);
+	grid = Grid<vector<Atom *> > (nx, ny, nz);
+/*	for (unsigned int i=0; i<nx; i++) {
+		for (unsigned int j=0; j<ny; j++) {
+			for (unsigned int k=0; k<nz; k++) {
+				sqrs.push_back(&grid[i][j][k]);
+			}
+		}
+	}*/
+}
+
+void AtomGrid::populateAssignNeigh(vector<Atom *> &atoms, double cut) {
+	double cutSqr = cut * cut;
+	for (unsigned int i=0, ii=atoms.size(); i<ii; i++) {
+		Atom *a = atoms[i];
+		a->neighbors.erase(a->neighbors.begin(), a->neighbors.end()); //keeping memory alloced, why not.  who knows what's faster
+		Vector aPos = a->pos;
+		a->posWhenGrid = aPos;
+		int x = (a->pos.x - box.xlo) / dx;
+		int y = (a->pos.y - box.ylo) / dy;
+		int z = (a->pos.z - box.zlo) / dz;
+		for (int i = fmax(0, x-1), ii = fmin(nx, x+2); i<ii; i++) {
+			for (int j = fmax(0, y-1), jj = fmin(ny, y+2); j<jj; j++) {
+				for (int k = fmax(0, z-1), kk = fmin(nz, z+2); k<kk; k++) {
+					vector<Atom *> sqr = grid[i][j][k];
+					for (unsigned int q=0; q<sqr.size(); q++) {
+						Atom *b = sqr[i];
+						if (b->pos.distSqr(a) <= cutSqr) {
+							a->neighbors.push_back(b);
+							b->neighbors.push_back(a);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+
 Vector AtomGrid::sqrPosition(vector <Atom*> *sqr) {
-	for (unsigned int i=0; i<grid.size(); i++) {
-		for (unsigned int j=0; j<grid[i].size(); j++) {
-			for (unsigned int k=0; k<grid[i][j].size(); k++) {
+	for (unsigned int i=0; i<nx; i++) {
+		for (unsigned int j=0; j<ny; j++) {
+			for (unsigned int k=0; k<nz; k++) {
 				if (&grid[i][j][k] == sqr) {
 					return Vector(box.xlo + dx * i, box.ylo + dy * j, box.zlo + dz * k);
 				}
@@ -60,6 +112,10 @@ Vector AtomGrid::sqrPosition(vector <Atom*> *sqr) {
 		}
 	}
 	return Vector(-1, -1, -1);
+}
+
+Box getSquareBox(int x, int y, int z) {
+	return Box(box.xlo + x * dx, box.ylo + y * dy, box.zlo + z * dz);
 }
 
 void AtomGrid::printAtom(Atom *a) {
