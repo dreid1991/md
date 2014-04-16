@@ -56,6 +56,19 @@ AtomGrid::AtomGrid(vector<Atom *> &atoms_, Box box_, double dx_, double dy_, dou
 AtomGrid::AtomGrid() {
 
 }
+
+AtomGrid::buildSquares() {
+	for (unsigned int i=0; i<nx; i++) {
+		for (unsigned int j=0; j<ny; j++) {
+			for (unsigned int k=0; k<nz; k++) {
+				sqrs.push_back(&grid[i][j][k]);
+			}
+		}
+	}
+}
+
+AtomGrid::select
+
 AtomGrid::AtomGrid(Box box, int dx_, int dy_, int dz_) {
 	dx = dx_;
 	dy = dy_;
@@ -65,6 +78,7 @@ AtomGrid::AtomGrid(Box box, int dx_, int dy_, int dz_) {
 	nz = (unsigned int) ceil((box.zhi - box.zlo) / dz);
 	size = Vector(box.xhi - box.xlo, box.yhi - box.ylo, box.zhi - box.zlo);
 	grid = Grid<vector<Atom *> > (nx, ny, nz);
+	buildSquares();
 /*	for (unsigned int i=0; i<nx; i++) {
 		for (unsigned int j=0; j<ny; j++) {
 			for (unsigned int k=0; k<nz; k++) {
@@ -73,12 +87,43 @@ AtomGrid::AtomGrid(Box box, int dx_, int dy_, int dz_) {
 		}
 	}*/
 }
+AtomGrid::loopOntoGrid(vector<Atom *> &atoms) {
+	for (unsigned int i=0; i<atoms.size(); i++) {
+		Atom *a = atoms[i];
+		int x = floor((a->pos.x - box.xlo) / box.trace.x);
+		int y = floor((a->pos.y - box.ylo) / box.trace.y);
+		int z = floor((a->pos.z - box.zlo) / box.trace.z);
+		int dx = -floor(x / nx);
+		int dy = -floor(y / ny);
+		int dz = -floor(z / nz);
+		a->pos.x += dx * box.trace.x;
+		a->pos.y += dy * box.trace.y;
+		a->pos.z += dz * box.trace.z;
+	}
+}
 
-void AtomGrid::populateAssignNeigh(vector<Atom *> &atoms, double cut) {
+int AtomGrid::faceId(int x, int y, int z) {
+	if (x) {
+		return x > 0 ? 1 : 0;
+	}
+	if (y) {
+		return y > 0 ? 3 : 2;
+	}
+	if (z) {
+		return z > 0 ? 5 : 4;
+	}
+}
+
+void AtomGrid::populateAssignNeigh(vector<Atom *> &atoms, double cut, bool atomsAreOnGrid) {
 	double cutSqr = cut * cut;
+	if (!atomsAreOnGrid) {
+		loopOntoGrid(atoms);	
+	}
 	for (unsigned int i=0, ii=atoms.size(); i<ii; i++) {
 		Atom *a = atoms[i];
 		a->neighbors.erase(a->neighbors.begin(), a->neighbors.end()); //keeping memory alloced, why not.  who knows what's faster
+		a->ghosts.erase(a->ghosts.begin(), a->ghosts.end());
+		a->ghostOffsets.erase(a->ghostOffsets.begin(), a->ghostOffsets.end());
 		Vector aPos = a->pos;
 		a->posWhenGrid = aPos;
 		int x = (a->pos.x - box.xlo) / dx;
@@ -98,6 +143,7 @@ void AtomGrid::populateAssignNeigh(vector<Atom *> &atoms, double cut) {
 				}
 			}
 		}
+		grid[x][y][z].push_back(a);
 	}
 }
 

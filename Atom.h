@@ -26,8 +26,9 @@ class Atom {
 			crystalGroup = NULL;
 			m = m;
 		}
+		vector<Atom *> ghosts;
+		vector<Vector> ghostOffsets;
 		vector<Atom*> neighbors;
-		vector<Vector> neighborOffsets;
 		Vector pos;	
 		Vector posWhenGrid;
 		double r;

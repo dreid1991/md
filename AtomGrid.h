@@ -28,8 +28,11 @@ class AtomGrid {
 		vector<vector<vector<Atom *> > > &operator[](int x) {
 			return grid[x];
 		}
+		int faceId(int, int, int);
+		void loopOntoGrid(vector<Atom *> &);
+		void buildSquares();
 		Box getSquareBox(int, int int);
-
+		vector<vector<Atom *> *> sqrs;
 		map<map<string, double>, double> radii;
 		Vector size;
 		vector<Atom *> atoms;
