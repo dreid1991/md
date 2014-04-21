@@ -29,6 +29,9 @@ class Atom {
 		vector<Atom *> ghosts;
 		vector<Vector> ghostOffsets;
 		vector<Atom*> neighbors;
+		Vector accel;
+		Vector accelLast;
+		Vector vel;
 		Vector pos;	
 		Vector posWhenGrid;
 		double r;
