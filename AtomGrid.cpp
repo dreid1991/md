@@ -43,12 +43,13 @@ AtomGrid::AtomGrid(vector<Atom *> &atoms_, Box box_, double dx_, double dy_, dou
 			int x = floor((a->pos.x - box.xlo) / box.trace.x);
 			int y = floor((a->pos.y - box.ylo) / box.trace.y);
 			int z = floor((a->pos.z - box.zlo) / box.trace.z);
-			int dx = -floor(x / nx);
-			int dy = -floor(y / ny);
-			int dz = -floor(z / nz);
-			a->pos.x += dx * box.trace.x;
-			a->pos.y += dy * box.trace.y;
-			a->pos.z += dz * box.trace.z;
+
+			a->pos.x -= dx * box.trace.x;
+			a->pos.y -= dy * box.trace.y;
+			a->pos.z -= dz * box.trace.z;
+			x = (a->pos.x - box.xlo) / box.trace.x;
+			y = (a->pos.y - box.ylo) / box.trace.y;
+			z = (a->pos.z - box.zlo) / box.trace.z;
 			grid[x][y][z].push_back(a);
 		}
 	}
